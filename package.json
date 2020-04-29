@@ -1,25 +1,22 @@
 {
-  "name": "name-contests-api",
+  "name": "test",
   "version": "1.0.0",
-  "description": "Name contests API",
-  "author": "Samer Buna",
+  "description": "test",
+  "author": "test",
   "license": "ISC",
   "scripts": {
-    "start": "node lib/index"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/reactjscamp/name-contests.git"
+    "start": "node lib/index",
+    "dev": "nodemon --exec node lib/index.js"
   },
   "keywords": [
     "graphql"
   ],
-  "bugs": {
-    "url": "https://github.com/reactjscamp/name-contests/issues"
-  },
-  "homepage": "https://github.com/reactjscamp/name-contests#readme",
   "dependencies": {
+    "express": "^4.17.1",
+    "express-graphql": "^0.9.0",
+    "graphql": "^15.0.0",
     "mongodb": "^2.1.18",
+    "mssql": "^6.2.0",
     "pg": "^6.0.1"
   },
   "devDependencies": {

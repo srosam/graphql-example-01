@@ -3,19 +3,61 @@ const {
     GraphQLObjectType,
     GraphQLList,
     GraphQLID,
-    GraphQLNonNull
+    GraphQLNonNull,
+    GraphQLString
 } = require('graphql');
 
 const mssql_owner = require('../database/mssql/owner');
 const mssql_account = require('../database/mssql/account');
 
-const OwnerType = require('./types/customTypes');
+const customTypes = require('./types/customTypes');
+
+const RootMutation = new GraphQLObjectType({
+    name: 'RootMutation',
+    description: 'Root for mutations',
+    fields: () => ({
+        addOwner: {
+            type: customTypes.ownerType,
+            description: 'Add an Owner',
+            args: {
+                id: {type: GraphQLNonNull(GraphQLID)},
+                name: {type: GraphQLNonNull(GraphQLString)},
+                address: {type: GraphQLNonNull(GraphQLString)}
+            },
+            resolve: (parent, args, {mssqlConfig}) => {
+                return mssql_owner(mssqlConfig)
+                    .add(args.id, args.name, args.address)
+                    .then((val) => {
+                        return val;
+                    });
+            }
+        },
+        addAccount: {
+            type: customTypes.accountType,
+            description: 'Add an Account',
+            args: {
+                id: {type: GraphQLNonNull(GraphQLID)},
+                description: {type: GraphQLString},
+                type: {type:  GraphQLNonNull(GraphQLID)},
+                ownerId: {type: GraphQLNonNull(GraphQLID)}
+            },
+            resolve: (parent, args, {mssqlConfig}) => {
+                return mssql_account(mssqlConfig)
+                            .add(args.id, args.description, args.type, args.ownerId)
+                            .then((val) => {
+                                return val;
+                            });
+            }
+        }
+    })
+});
 
 const RootQueryType = new GraphQLObjectType({
-    name: 'RootQueryType',
+    name: 'RootQuery',
+    description: 'Root for queries',
     fields: {
         Owners: {
-            type: GraphQLList(OwnerType.ownerType),
+            type: GraphQLList(customTypes.ownerType),
             description: "All account owners",
             resolve: (obj, args, { mssqlConfig }) => {
                 return mssql_owner(mssqlConfig)
@@ -23,7 +65,7 @@ const RootQueryType = new GraphQLObjectType({
             }
         },
         Owner: {
-            type: OwnerType.ownerType,
+            type: customTypes.ownerType,
             args: {
                 id: {
                     type: new GraphQLNonNull(GraphQLID)
@@ -35,14 +77,14 @@ const RootQueryType = new GraphQLObjectType({
             }
         },
         Accounts:{
-            type: GraphQLList(OwnerType.accountType),
+            type: GraphQLList(customTypes.accountType),
             description: "The Accounts",
             resolve: (obj, args, {mssqlConfig}) => {
                 return mssql_account(mssqlConfig).getAll();
             }
         },
         Account: {
-            type: OwnerType.accountType,
+            type: customTypes.accountType,
             args: {
                 id: {
                     type: new GraphQLNonNull(GraphQLID)
@@ -58,6 +100,7 @@ const RootQueryType = new GraphQLObjectType({
 
 const nSchema = new GraphQLSchema({
     query: RootQueryType,
+    mutation: RootMutation,
     name: "RootQuery"
 });
 
